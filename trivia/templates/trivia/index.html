@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- Specifies character encoding and sets viewport for responsive design -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- Page title displayed on the browser tab -->
+  <title>Quiz App</title>
+  
+  <!-- Link to Bootstrap CSS for responsive design and components -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  
+  <!-- Link to Google Fonts for custom fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+  
+  <!-- Internal CSS Styles -->
+  <style>
+    /* Sets the background with a linear gradient and applies a custom font */
+    body {
+      background: linear-gradient(to right, rgb(244, 235, 215), rgb(255, 179, 0));
+      font-family: "Ubuntu", sans-serif;
+    }
+
+    /* Styling for the main heading */
+    h1 {
+      color: #fff; /* White color */
+      text-align: center; /* Centered text */
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); /* Adds subtle shadow */
+      display: none; /* Hidden initially (will fade in later) */
+      font-weight: 400;
+      font-size: 60px;
+      font-family: "Lilita One", sans-serif; /* Custom font */
+    }
+
+    /* Card styling for the quiz */
+    .card {
+      background-color: #ffffffdd; /* Transparent white background */
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Adds depth with shadow */
+    }
+
+    .card-body {
+      padding: 30px; /* Padding around the card body */
+    }
+
+    /* Styling for labels */
+    .form-group label {
+      font-weight: bold;
+      color: #333;
+    }
+
+    /* Styling for the question text */
+    #questionText {
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      color: #333; /* Dark text color */
+    }
+
+    /* Hidden hint box, revealed with the button */
+    #hintText {
+      background-color: rgb(255, 179, 0); /* Yellow background */
+      border: 1px solid #ddd; /* Light border */
+      border-radius: 5px;
+      padding: 10px;
+      margin-top: 15px;
+      font-style: italic; /* Italic style for hint text */
+      transition: opacity 0.5s ease-in-out; /* Smooth transition for reveal */
+      opacity: 0; /* Hidden by default */
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* When the hint is shown, change opacity */
+    #hintText.show {
+      opacity: 1;
+    }
+
+    /* Styling for the hint button */
+    #hintButton {
+      background-color: rgb(255, 179, 0); /* Yellow background */
+      color: white;
+      border-radius: 10px;
+      padding: 10px 20px;
+      transition: background-color 0.3s ease-in-out; /* Smooth hover effect */
+    }
+
+    /* Hint button hover effect */
+    #hintButton:hover {
+      background-color: rgb(136, 99, 13); /* Darker yellow on hover */
+    }
+
+    /* Styling for the submit button */
+    #submitButton {
+      background-color: #28a745; /* Green background */
+      color: white;
+      border-radius: 10px;
+      padding: 10px 20px;
+      transition: background-color 0.3s ease-in-out;
+    }
+
+    /* Submit button hover effect */
+    #submitButton:hover {
+      background-color: #218838; /* Darker green on hover */
+    }
+
+    /* Styling for the answer textarea */
+    textarea {
+      resize: none; /* Prevent resizing */
+      border-radius: 10px;
+      border: 2px solid #ddd; /* Light border */
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Container for the question heading -->
+  <div class="container-fluid mx-3 mt-2">
+    <h1>QUESTION {{ card.cardId | add:"-20" }}</h1> <!-- Dynamic heading with card ID -->
+  </div>
+
+  <!-- Main card containing the quiz question and answer form -->
+  <div class="card m-4">
+    <div class="card-body">
+      <form action="/trivia/eval/" method="post">
+        {% csrf_token %} <!-- Security token to prevent CSRF attacks -->
+
+        <!-- Question Section -->
+        <h3 id="questionText" class="card-text">
+          {{ card.question }} <!-- Dynamic insertion of question text -->
+        </h3>
+
+        <!-- Answer Textarea -->
+        <div class="form-group">
+          <label for="answerTextarea">Your Answer:</label>
+          <textarea id="answerTextarea" name="answerTextarea" class="form-control" rows="3"
+            placeholder="Type your answer here"></textarea>
+        </div>
+
+        <!-- Hidden hint text, revealed when the hint button is clicked -->
+        <p id="hintText">{{ card.hint }}</p>
+
+        <!-- Hidden field containing the card ID -->
+        <input type="hidden" id="cardId" name="cardId" value="{{ card.cardId }}">
+
+        <!-- Button to reveal the hint -->
+        <button id="hintButton" class="btn btn-info my-2" type="button">
+          Show Hint
+        </button>
+
+        <!-- Button to submit the answer -->
+        <button id="submitButton" class="btn btn-primary" type="submit">
+          Submit Answer
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Popper.js and Bootstrap JavaScript for interactivity and responsiveness -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+    integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- jQuery library for DOM manipulation and AJAX -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+  <!-- JavaScript for handling animations and AJAX form submission -->
+  <script>
+    $(document).ready(function(){
+      $('h1').fadeIn(2000); // Fade in the heading over 2 seconds when the document is ready
+    });
+
+    // Submit button AJAX functionality
+    $('#submitButton').click(function (event) {
+      event.preventDefault(); // Prevent default form submission
+      
+      var currentId = $('#cardId').val(); // Get current card ID
+      var answerText = $('#answerTextarea').val(); // Get user's answer
+
+      // AJAX request to submit the answer
+      $.ajax({
+        type: 'POST',
+        url: "/trivia/eval/", // URL for form submission
+        data: {
+          "currentId": currentId,
+          "answerText": answerText,
+          'csrfmiddlewaretoken': '{{ csrf_token }}' // Include CSRF token for security
+        },
+        success: function (response) {
+          // On success, update the question and hint
+          if (response.correct) {
+            $('#questionText').text(response.nextQuestion); // Update to the next question
+            $('#cardId').val(response.nextId); // Update hidden card ID field
+            $('#hintText').text(response.nextHint).removeClass('show'); // Hide hint on correct answer
+            $('h1').text('Question ' + (response.nextId - 20)); // Update heading
+            $('#answerTextarea').val(''); // Clear the answer textarea
+          } else {
+            alert('Incorrect Answer. Please try again'); // Show alert on incorrect answer
+          }
+        }
+      });
+    });
+
+    // Show the hint when the hint button is clicked
+    $("#hintButton").click(function () {
+      $('#hintText').addClass('show'); // Show the hidden hint text
+    });
+  </script>
+</body>
+
+</html>
